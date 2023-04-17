@@ -1,0 +1,4 @@
+requests
+python-keycloak
+Flask
+Flask-SQLAlchemy
