@@ -1,7 +1,13 @@
-import requests
+import requests, os
 
-api_key = "AIzaSyB35CI_LJS0IsdgyawEWQfaua7TxjfqGvk"
-channel_id = "UCuLg6_A11jThIZ2N2d0DC9A"
+flask_env = os.getenv("INLAND_HIS_ENV")
+
+if flask_env == "development":
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+api_key = os.getenv("YOUTUBE_API_KEY")
+channel_id = os.getenv("YOUTUBE_CHANNEL_ID")
 max_results = 50
 page_token = None
 

@@ -2,3 +2,4 @@ requests
 python-keycloak
 Flask
 Flask-SQLAlchemy
+python-dotenv
