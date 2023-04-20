@@ -3,3 +3,6 @@ python-keycloak
 Flask
 Flask-SQLAlchemy
 python-dotenv
+psycopg2-binary
+python-dateutil
+flask-cors
