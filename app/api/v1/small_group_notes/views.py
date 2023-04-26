@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app.api.v1.small_group_notes.services import SmallGroupNoteService
-
+from app.api.v1.small_group_notes.utils import format_small_group_notes_data
 small_group_notes_blueprint = Blueprint('small_group_notes', __name__, url_prefix="/api/v1/small-group-notes")
 
 @small_group_notes_blueprint.route('/upload', methods=['POST'])
@@ -19,6 +19,11 @@ def upload_small_group_note():
             "message": "File Uploaded and saved successfully",
             "small_group_note_id": small_group_note.id
         })
-    
     return jsonify({"error": "Invalid file format"}), 400
+
+@small_group_notes_blueprint.route("/", methods=["GET"])
+def get_videos():
+    small_group_notes = SmallGroupNoteService.get_all_small_group_notes()
+    small_group_notes_data = format_small_group_notes_data(small_group_notes)
+    return jsonify(small_group_notes_data)
         

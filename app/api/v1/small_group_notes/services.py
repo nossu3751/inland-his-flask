@@ -1,6 +1,7 @@
 from app.models.small_group_note import SmallGroupNote
 from app.extensions import db
 from .utils import parse_docx
+from sqlalchemy import select
 
 class SmallGroupNoteService:
     @staticmethod
@@ -15,4 +16,13 @@ class SmallGroupNoteService:
         db.session.add(small_group_note)
         db.session.commit()
         return small_group_note
+    
+    @staticmethod
+    def get_all_small_group_notes():
+        stmt = select(SmallGroupNote).order_by(SmallGroupNote.date_posted.desc())
+        return db.session.execute(stmt).scalars()
 
+    @staticmethod
+    def get_small_group_note_by_id(id):
+        stmt = select(SmallGroupNote).where(SmallGroupNote.id == id)
+        return db.session.execute(stmt).scalar_one_or_none()
