@@ -106,6 +106,33 @@ def parse_docx(docx):
                     {html.escape(run['text'])}
                 </span>
             '''
+    def html_structure_builder(type:str,text:str,color:str|None,font_weight:int|None,line_breaks:int,underline:str|None):
+        return {
+            "type":type,
+            "text":text,
+            "color":color,
+            "font_weight":font_weight,
+            "line_breaks":line_breaks,
+            "underline":underline
+        }
+    
+    html_structure = {
+        "template":[],
+        "inputs":{}
+    }
+    input_key = 0
+    for run in runs:
+        if run["underline"] != None and str(run["text"]).isspace():
+            html_structure["template"].append(html_structure_builder(
+                "input","",None,None,0,None
+            ))
+            html_structure["inputs"][input_key] = ""
+            input_key += 1
+        else:
+            html_structure["template"].append(html_structure_builder(
+                "text",run["text"],run["color"],run["font_weight"],run["line_breaks"],run["underline"]
+            ))
+
 
     date_posted = datetime.utcnow()
     sunday_date = date_posted + timedelta(days=(6 - date_posted.weekday()))
