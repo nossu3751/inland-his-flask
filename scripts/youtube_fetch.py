@@ -1,6 +1,7 @@
 import requests, os, sys
 from dateutil.parser import parse
-sys.path.append('..')
+sys.path.append(f'{sys.path[0]}/..')
+print(sys.path)
 from app import create_app
 from app.extensions import db
 from app.models.video import Video

@@ -6,3 +6,6 @@ python-dotenv
 psycopg2-binary
 python-dateutil
 flask-cors
+python-dateutil
+python-docx
+lxml
