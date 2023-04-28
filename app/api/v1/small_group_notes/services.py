@@ -8,7 +8,7 @@ class SmallGroupNoteService:
     def parse_and_save_docx(docx):
         parsed = parse_docx(docx)
         small_group_note = SmallGroupNote(
-            html_string = parsed["html"],
+            html_template_data = parsed["html_template_data"],
             title = parsed["title"],
             sunday_date = parsed["sunday_date"],
             date_posted = parsed["date_posted"]
