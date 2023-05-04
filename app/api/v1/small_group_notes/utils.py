@@ -10,7 +10,7 @@ def format_small_group_note_data(small_group_note):
             "date_posted": small_group_note.date_posted.isoformat(),
             "html_template_data": small_group_note.html_template_data,
             "id": small_group_note.id,
-            "date_posted": small_group_note.sunday_date.isoformat()
+            "sunday_date": small_group_note.sunday_date.isoformat()
         }
 
 def format_small_group_notes_data(small_group_notes):

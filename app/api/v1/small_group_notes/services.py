@@ -1,3 +1,4 @@
+from flask import abort
 from app.models.small_group_note import SmallGroupNote
 from app.extensions import db
 from .utils import parse_docx
@@ -26,3 +27,26 @@ class SmallGroupNoteService:
     def get_small_group_note_by_id(id):
         stmt = select(SmallGroupNote).where(SmallGroupNote.id == id)
         return db.session.execute(stmt).scalar_one_or_none()
+
+    @staticmethod
+    def update_small_group_note(id, update_data):
+        # Step 2: Retrieve the SmallGroupNote object by its ID
+        small_group_note = SmallGroupNoteService.get_small_group_note_by_id(id)
+
+        if small_group_note is None:
+            return None
+
+        # Step 3: Update the desired fields of the object
+        if "html_template_data" in update_data:
+            small_group_note.html_template_data = update_data["html_template_data"]
+        if "title" in update_data:
+            small_group_note.title = update_data["title"]
+        if "sunday_date" in update_data:
+            small_group_note.sunday_date = update_data["sunday_date"]
+        if "date_posted" in update_data:
+            small_group_note.date_posted = update_data["date_posted"]
+
+        # Step 4: Commit the changes to the database
+        db.session.commit()
+
+        return small_group_note     
