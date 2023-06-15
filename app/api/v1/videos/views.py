@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app.api.v1.videos.services import VideoService
-from app.api.v1.videos.utils import format_videos_data
+from app.api.v1.videos.utils import format_videos_data, format_video_data
 
 videos_blueprint = Blueprint("videos", __name__, url_prefix="/api/v1/videos")
 
@@ -17,10 +17,64 @@ def get_shorts():
     return jsonify(shorts_data)
 
 @videos_blueprint.route("/live_streams", methods=["GET"])
-def get_past_live_streams():
-    live_streams = VideoService.get_all_past_live_streams()
-    live_stream_data = format_videos_data(live_streams)
-    return jsonify(live_stream_data)
+def get_live_streams():
+    video_id = request.args.get('id')
+    index = request.args.get('index')
+    try:
+        if video_id is not None:
+            live_stream = VideoService.get_video_by_id(video_id)
+            if live_stream is not None:
+                live_stream_data = format_video_data(live_stream)  
+                return jsonify(live_stream_data)
+            else:
+                return jsonify({"error": "No video with that id found"}), 404
+        elif index is not None:
+            live_stream = VideoService.get_live_streams_by_index(index)
+            if live_stream is not None:
+                live_stream_data = format_video_data(live_stream)  
+                return jsonify(live_stream_data)
+            else:
+                return jsonify({"error": "No video at index"}), 404
+        else:
+            live_streams = VideoService.get_all_past_live_streams()
+            if live_streams is not None:
+                live_stream_data = format_videos_data(live_streams)
+                return jsonify(live_stream_data)
+            else:
+                return jsonify({"error": "No videos found"}), 404
+    except Exception as e:
+                import traceback
+                traceback.print_exc()
+                return jsonify({"error": "Error occurred: {}".format(str(e))}), 500
+# def get_past_live_streams():
+#     live_streams = VideoService.get_all_past_live_streams()
+#     live_stream_data = format_videos_data(live_streams)
+#     return jsonify(live_stream_data)
+
+@videos_blueprint.route("/live_streams/<int:index>", methods=["GET"])
+def get_live_stream_by_index(index):
+    try:
+        live_stream = VideoService.get_live_streams_by_index(index)
+        if live_stream is not None:
+            live_stream_data = format_video_data(live_stream)  
+            return jsonify(live_stream_data)
+        else:
+            return jsonify({"error": "No video at index"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error occurred: {}".format(str(e))}), 500
+    
+# @videos_blueprint.route("/live_streams/<int:index>", methods=["GET"])
+# def get_live_stream_by_id(video_id):
+#     try:
+#         live_stream = VideoService.get_video_by_id(video_id)
+#         if live_stream is not None:
+#             live_stream_data = format_video_data(live_stream)  
+#             return jsonify(live_stream_data)
+#         else:
+#             return jsonify({"error": "No video at index"}), 404
+#     except Exception as e:
+#         return jsonify({"error": "Error occurred: {}".format(str(e))}), 500
+
 
 @videos_blueprint.route("/live_streams/range", methods=["GET"])
 def get_live_streams_range():
