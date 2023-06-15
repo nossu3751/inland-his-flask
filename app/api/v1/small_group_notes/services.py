@@ -1,4 +1,3 @@
-from flask import abort
 from app.models.small_group_note import SmallGroupNote
 from app.extensions import db
 from .utils import parse_docx

@@ -20,6 +20,15 @@ class VideoService:
         return db.session.execute(stmt).scalars()
     
     @staticmethod
+    def get_live_streams_range(start, count):
+        stmt = (select(Video)
+                .where(Video.video_type == "live_streams")
+                .order_by(Video.uploaded_at.desc())
+                .offset(start)
+                .limit(count))
+        return db.session.execute(stmt).scalars()
+    
+    @staticmethod
     def get_all_shorts():
         stmt = select(Video).where(Video.video_type == "shorts")
         return db.session.execute(stmt).scalars()

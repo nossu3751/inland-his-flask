@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, abort
 from app.api.v1.small_group_notes.services import SmallGroupNoteService
 from app.api.v1.small_group_notes.utils import format_small_group_notes_data, format_small_group_note_data
+
 small_group_notes_blueprint = Blueprint('small_group_notes', __name__, url_prefix="/api/v1/small-group-notes")
 
 @small_group_notes_blueprint.route('/upload', methods=['POST'])

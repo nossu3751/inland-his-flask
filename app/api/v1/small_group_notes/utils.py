@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from docx import Document
 import lxml.etree as ET
 import html
+import html2text
 
 def format_small_group_note_data(small_group_note):
     return {
@@ -34,7 +35,7 @@ def parse_docx(docx):
                 "color": color, 
                 "line_breaks": line_breaks,
                 "font_weight": font_weight
-        }
+            }
         root = ET.fromstring(xml)
         all_str = []
         
@@ -129,7 +130,8 @@ def parse_docx(docx):
     html_structure = {
         "template":runs,
         "inputs":{i:"" for i in range(input_count)},
-        "html_string": html_str
+        "html_string": html_str,
+        "plain_string": html2text.html2text(html_str)
     }
     
     date_posted = datetime.utcnow()

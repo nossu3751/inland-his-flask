@@ -9,3 +9,4 @@ flask-cors
 python-dateutil
 python-docx
 lxml
+html2text
