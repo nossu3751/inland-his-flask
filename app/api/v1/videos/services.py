@@ -33,3 +33,11 @@ class VideoService:
         stmt = select(Video).where(Video.video_type == "shorts")
         return db.session.execute(stmt).scalars()
 
+    @staticmethod
+    def get_live_streams_by_index(index):
+        stmt = (select(Video)
+                .where(Video.video_type == "live_streams")
+                .order_by(Video.uploaded_at.desc())
+                .offset(index)
+                .limit(1))
+        return db.session.execute(stmt).scalar_one_or_none()
