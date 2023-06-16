@@ -15,6 +15,19 @@ class BulletinService:
     def get_bulletin_by_id(id):
         stmt = select(Bulletin).where(Bulletin.id == id)
         return db.session.execute(stmt).scalar_one_or_none()
+    
+    @staticmethod
+    def get_bulletin_by_sunday_date(sunday_date:str):
+        stmt = select(Bulletin).where(str(Bulletin.sunday_date) == sunday_date)
+        return db.session.execute(stmt).scalar_one_or_none()
+    
+    @staticmethod
+    def get_bulletin_by_index(index):
+        stmt = (select(Bulletin)
+                .order_by(Bulletin.sunday_date.desc())
+                .offset(index)
+                .limit(1))
+        return db.session.execute(stmt).scalar_one_or_none()
 
     @staticmethod
     def update_bulletin(id, update_data):

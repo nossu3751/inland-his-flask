@@ -53,6 +53,29 @@ def update_bulletin(bulletin_id):
     return jsonify(format_bulletin_data(updated_bulletin)), 200
 
 @bulletins_blueprint.route('/', methods=['GET'])
-def get_all_bulletins():
-    bulletins = BulletinService.get_all_bulletins()
-    return jsonify(format_bulletins_data(bulletins)), 200
+def get_bulletins():
+    try:
+        index = request.args.get('index')
+        sunday = request.args.get('sunday')
+        if sunday:
+            bulletin = BulletinService.get_bulletin_by_sunday_date(sunday)
+            if bulletin:
+                return jsonify(format_bulletin_data(bulletin))
+            else:
+                return jsonify({"error": "No bulletin on that sunday"}), 404
+        elif index:
+            bulletin = BulletinService.get_bulletin_by_index(index)
+            if bulletin:
+                return jsonify(format_bulletin_data(bulletin))
+            else:
+                return jsonify({"error": "No bulletin on that index"}), 404
+        else:
+            bulletins = BulletinService.get_all_bulletins()
+            if bulletins:
+                return jsonify(format_bulletins_data(bulletins))
+            else:
+                return jsonify({"error": "No bulletins found"}), 404
+    except Exception as e:
+                import traceback
+                traceback.print_exc()
+                return jsonify({"error": "Error occurred: {}".format(str(e))}), 500
