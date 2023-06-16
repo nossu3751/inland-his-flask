@@ -18,7 +18,8 @@ class BulletinService:
     
     @staticmethod
     def get_bulletin_by_sunday_date(sunday_date:str):
-        stmt = select(Bulletin).where(str(Bulletin.sunday_date) == sunday_date)
+        print(sunday_date)
+        stmt = select(Bulletin).where(Bulletin.sunday_date == sunday_date)
         return db.session.execute(stmt).scalar_one_or_none()
     
     @staticmethod
