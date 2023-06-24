@@ -2,20 +2,21 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from config import Config
-from .extensions import db
+from .extensions import db, keycloak_admin_wrapper, KeycloakAdmin
 from app.api.v1.videos.views import videos_blueprint
 from app.api.v1.small_group_notes.views import small_group_notes_blueprint
 from app.api.v1.bulletins.views import bulletins_blueprint
+from app.api.v1.persons.views import persons_blueprint
 
 flask_env = os.getenv("INLAND_HIS_ENV")
 
 if flask_env == "development":
     from dotenv import load_dotenv
     load_dotenv()
-    origins = "*"
+    origins = ["*"]
 else:
     origins = [
-        "http://localhost:4200","https://a2f8-76-90-129-219.ngrok-free.app","https://33d9-76-90-129-219.ngrok-free.app"
+        "http://localhost:4200/*","https://a2f8-76-90-129-219.ngrok-free.app/*","https://33d9-76-90-129-219.ngrok-free.app/*"
     ]
 
 def create_app():
@@ -27,8 +28,16 @@ def create_app():
     app.register_blueprint(videos_blueprint)
     app.register_blueprint(small_group_notes_blueprint)
     app.register_blueprint(bulletins_blueprint)
+    app.register_blueprint(persons_blueprint)
 
     db.init_app(app)
+    keycloak_admin_wrapper.init(
+        server_url=os.getenv('KEYCLOAK_ADMIN_SERVER_DEV') if flask_env == 'development' else os.getenv('KEYCLOAK_ADMIN_SERVER_PROD'),
+        username=os.getenv('KEYCLOAK_ADMIN_USERNAME'),
+        password=os.getenv('KEYCLOAK_ADMIN_PASSWORD'),
+        realm_name=os.getenv('KEYCLOAK_ADMIN_REALM'),
+        client_id=os.getenv('KEYCLOAK_ADMIN_CLIENT')
+    )
 
     with app.app_context():
         db.create_all()

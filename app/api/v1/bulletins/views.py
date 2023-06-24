@@ -8,17 +8,17 @@ bulletins_blueprint = Blueprint('bulletins', __name__, url_prefix="/api/v1/bulle
 @bulletins_blueprint.route('/', methods=['POST'])
 def upload_bulletin():
     data = request.json
-
+    
     if not data:
         abort(400, description="Missing or invalid request data")
 
     date_posted = datetime.utcnow()
     sunday_date = (date_posted + timedelta(days=(6 - date_posted.weekday()))).date()
-    print(sunday_date)
+    
     data["sunday_date"] = sunday_date
 
     existing_bulletin = Bulletin.query.filter_by(sunday_date=sunday_date).first()
-
+ 
     if existing_bulletin:
         return jsonify({
             "message": "The bulletin for this sunday already exists. Would you like to update the bulletin instead?",
