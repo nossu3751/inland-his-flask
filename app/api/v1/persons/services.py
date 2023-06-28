@@ -1,5 +1,6 @@
 from app.extensions import keycloak_admin_wrapper
 import keycloak
+import traceback
 
 class PersonService:
 
@@ -16,9 +17,7 @@ class PersonService:
             
     @staticmethod
     def get_persons():
-        print("hello")
         admin = keycloak_admin_wrapper.keycloak_admin
-        print("admin",admin)
         if not admin:
             return None
         else:
@@ -43,6 +42,7 @@ class PersonService:
         memo:str = ""
     ):
         admin = keycloak_admin_wrapper.keycloak_admin
+        password = keycloak_admin_wrapper.user_password
         if not admin:
             return None
         new_comer_info = {
@@ -53,7 +53,10 @@ class PersonService:
 
         try:
             new_comer_id = admin.create_user(payload=new_comer_info)
-            admin.set_user_password(new_comer_id, "password", False)
+            admin.set_user_password(new_comer_id, password, False)
+            new_comer_group_id = admin.get_group_by_path("/new-comer")["id"]
+            print(new_comer_group_id)
+            admin.group_user_add(new_comer_id, new_comer_group_id)
 
             attributes = {
                 "name":[name],
@@ -76,10 +79,13 @@ class PersonService:
             return admin.update_user(new_comer_id, {"attributes": attributes})
 
         except keycloak.exceptions.KeycloakPostError:
+
             return None
         except keycloak.exceptions.KeycloakPutError:
             admin.delete_user(new_comer_id)
             return None
+        finally:
+            traceback.print_exc()
 
     @staticmethod
     def remove_from_new_comer(id):
@@ -91,6 +97,8 @@ class PersonService:
             return None
         except Exception:
             return None
+        finally:
+            traceback.print_exc()
         
     @staticmethod
     def admit_person(id):
@@ -103,8 +111,18 @@ class PersonService:
             return None
         except Exception:
             return None
+        finally:
+            traceback.print_exc()
 
-        
-        # new_comer_id = new_comer.
+    @staticmethod
+    def authenticate_person(id):
+        ...
+
+    @staticmethod
+    def login_person(id):
+        ...
+
+    
+
 
         

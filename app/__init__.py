@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from config import Config
-from .extensions import db, keycloak_admin_wrapper, KeycloakAdmin
+from .extensions import db, keycloak_admin_wrapper, redis_wrapper, twilio_wrapper
 from app.api.v1.videos.views import videos_blueprint
 from app.api.v1.small_group_notes.views import small_group_notes_blueprint
 from app.api.v1.bulletins.views import bulletins_blueprint
@@ -36,8 +36,19 @@ def create_app():
         username=os.getenv('KEYCLOAK_ADMIN_USERNAME'),
         password=os.getenv('KEYCLOAK_ADMIN_PASSWORD'),
         realm_name=os.getenv('KEYCLOAK_ADMIN_REALM'),
-        client_id=os.getenv('KEYCLOAK_ADMIN_CLIENT')
+        client_id=os.getenv('KEYCLOAK_ADMIN_CLIENT'),
+        user_password=os.getenv('KEYCLOAK_DEFAULT_PASSWORD')
     )
+    redis_wrapper.init(
+        host=os.getenv('REDIS_HOST'),
+        port=os.getenv('REDIS_PORT'),
+        decode_response=True
+    )
+    twilio_wrapper.init(
+        account_sid=os.getenv('TWILIO_ACCOUNT_SID'),
+        auth_token=os.getenv('TWILIO_AUTH_TOKEN')
+    )
+    
 
     with app.app_context():
         db.create_all()
