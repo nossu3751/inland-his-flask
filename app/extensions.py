@@ -24,8 +24,10 @@ class RedisWrapper:
 class TwilioWrapper:
     def __init__(self):
         self.twilio = None
-    def init(self, account_sid, auth_token):
+        self.from_phone_number = None
+    def init(self, account_sid, auth_token, from_phone):
         self.twilio = Client(account_sid, auth_token)
+        self.from_phone_number = from_phone
 
 keycloak_admin_wrapper =  KeycloakAdminWrapper()
 redis_wrapper = RedisWrapper()

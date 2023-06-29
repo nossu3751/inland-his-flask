@@ -46,7 +46,8 @@ def create_app():
     )
     twilio_wrapper.init(
         account_sid=os.getenv('TWILIO_ACCOUNT_SID'),
-        auth_token=os.getenv('TWILIO_AUTH_TOKEN')
+        auth_token=os.getenv('TWILIO_AUTH_TOKEN'),
+        from_phone=os.getenv('TWILIO_PHONE_NUMBER')
     )
     
 
