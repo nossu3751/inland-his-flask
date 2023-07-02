@@ -3,7 +3,7 @@ import keycloak
 import traceback
 from app.api.v1.persons.exceptions import *
 from random import randint
-
+from app.api.v1.persons.decorators import keycloak_admin_authenticated
 
 class PersonService:
 
@@ -123,11 +123,14 @@ class PersonService:
         ...
 
     @staticmethod
+    @keycloak_admin_authenticated
     def send_verification_request(phone_number, name):
+        print("in here")
         admin = keycloak_admin_wrapper.keycloak_admin
 
         users = admin.get_users({"username":phone_number})
         if len(users) == 0:
+            print("user")
             raise PhoneNumberNotFoundException("Such phone number not found")
         user_id = users[0]['id']
         attributes = admin.get_user(user_id).get("attributes")
@@ -154,21 +157,27 @@ class PersonService:
                 from_=from_phone_number,
                 to=phone_number
             )
-            return redis.set(f"{phone_number}_verification", verification_number, ex=301)
+            return redis.set(f"{phone_number}_verification", str(verification_number), ex=301)
         except Exception:
             raise SendVerificationFailException("Failed to send verification request.")
 
     @staticmethod 
     def verify_person(phone_number, verification_number):
+
         redis = redis_wrapper.redis
         if not redis:
             raise RedisServerErrorException("There's something wrong with redis server")
         else:
-            correct_ver_num = redis.get(f"{phone_number}_verification")
+            verification_number = str(verification_number)
+            key = f"{phone_number}_verification"
+            correct_ver_num = redis.get(key)
             if correct_ver_num == None:
                 raise VerificationExpiredException("Verification Expired.")
             else:
-                return verification_number == correct_ver_num
+                verified = verification_number == correct_ver_num
+                if verified:
+                    redis.delete(key)
+                return verified
             
             
     

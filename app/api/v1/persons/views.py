@@ -60,22 +60,26 @@ def add_person():
         
 @persons_blueprint.route("/send_verification", methods=["POST"])
 def send_verification():
+   
     phone_number = request.json["phoneNumber"]
     name = request.json["name"]
     try:
         sent = PersonService.send_verification_request(phone_number, name)
         if sent:
-            return jsonify({"message":"successfully sent verfication message"}), 201
+            return jsonify({
+                "message":"successfully sent verfication message"}), 201
         else:
-            return jsonify({"error":"wasn't able to register verification number on server"}), 500
+            traceback.print_exc()
+            return jsonify({"error":"ServerError"}), 500
     except PhoneNumberNotFoundException:
-        return jsonify({"error":"phone number not found"}), 409
+        return jsonify({"error":"PhoneNumberNotFound"}), 409
     except DifferentNameException:
-        return jsonify({"error":"name doesn't match"}), 409
+        return jsonify({"error":"NameMatchNotFound"}), 409
     except PersonNotAdmittedException:
-        return jsonify({"error":"this person is not admitted yet"}), 409
+        return jsonify({"error":"PersonNotAdmittedYet"}), 409
     except Exception:
-        return jsonify({"error":"wasn't able to send verification request"}), 500
+        traceback.print_exc()
+        return jsonify({"error":"VerificationNotSent"}), 500
     
 @persons_blueprint.route("/verify", methods=["POST"])
 def verify():
@@ -87,11 +91,11 @@ def verify():
         if verified:
             return jsonify({"message":"successfully verified"}), 201
         else:
-            return jsonify({"error":"wrong verification number"}), 401
+            return jsonify({"error":"WrongVerificationNumber"}), 401
     except VerificationExpiredException:
-        return jsonify({"error":"Verification expired. Please verify again."}), 401
+        return jsonify({"error":"VerificationExpired"}), 401
     except Exception:
-        return jsonify({"error":"Can't verify now."}), 500
+        return jsonify({"error":"ServerError"}), 500
     
         
     

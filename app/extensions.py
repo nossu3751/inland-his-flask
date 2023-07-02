@@ -6,6 +6,11 @@ class KeycloakAdminWrapper:
     def __init__(self):
         self.keycloak_admin = None
         self.user_password = None
+        self._server_url = None
+        self._admin_user_name = None
+        self._admin_password = None
+        self._realm_name = None
+        self._client_id = None
     def init(self, server_url, username, password, realm_name, client_id, user_password):
         self.keycloak_admin = KeycloakAdmin(
             server_url=server_url,
@@ -13,6 +18,15 @@ class KeycloakAdminWrapper:
             password=password,
             realm_name=realm_name,
             client_id=client_id
+        )
+        self.user_password = user_password
+    def relogin(self):
+        self.keycloak_admin = KeycloakAdmin(
+            server_url=self._server_url,
+            username=self._admin_user_name,
+            password=self._admin_password,
+            realm_name=self._realm_name,
+            client_id=self._client_id
         )
 
 class RedisWrapper:
