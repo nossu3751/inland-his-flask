@@ -78,8 +78,19 @@ def get_live_stream_by_index(index):
 
 @videos_blueprint.route("/live_streams/range", methods=["GET"])
 def get_live_streams_range():
-    start = request.args.get('start', default = 0, type = int)
-    count = request.args.get('count', default = 10, type = int)
-    live_streams = VideoService.get_live_streams_range(start, count)
-    live_stream_data = format_videos_data(live_streams)
-    return jsonify(live_stream_data)
+    try:
+        start = request.args.get('start', default = 0, type = int)
+        count = request.args.get('count', default = 10, type = int)
+        
+        live_streams = VideoService.get_live_streams_range(start, count)
+        live_stream_data = format_videos_data(live_streams)
+        table_length = VideoService.get_total_live_streams()
+        lastPage = False
+        if start+count >= table_length:
+            lastPage = True
+        return jsonify({
+            "data":live_stream_data,
+            "lastPage":lastPage
+        })
+    except Exception:
+        return jsonify({"error":"ServerError"}), 500

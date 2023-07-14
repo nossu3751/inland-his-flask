@@ -1,6 +1,6 @@
 from app.extensions import db
 from app.models.video import Video
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 class VideoService:
 
@@ -27,6 +27,16 @@ class VideoService:
                 .offset(start)
                 .limit(count))
         return db.session.execute(stmt).scalars()
+    
+    @staticmethod
+    def get_total_count():
+        stmt = select(func.count()).select_from(Video)
+        return db.session.execute(stmt).scalar_one()
+    
+    @staticmethod
+    def get_total_live_streams():
+        stmt = select(func.count()).where(Video.video_type == "live_streams")
+        return db.session.execute(stmt).scalar_one()
     
     @staticmethod
     def get_all_shorts():

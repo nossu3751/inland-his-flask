@@ -33,7 +33,7 @@ class BulletinService:
     @staticmethod
     def update_bulletin(id, update_data):
         # Step 2: Retrieve the SmallGroupNote object by its ID
-        bulletin = Bulletin.get_small_group_note_by_id(id)
+        bulletin = BulletinService.get_bulletin_by_id(id)
 
         if bulletin is None:
             return None

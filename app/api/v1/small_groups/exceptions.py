@@ -1,0 +1,1 @@
+class MemberAlreadyAddedException(Exception):pass
