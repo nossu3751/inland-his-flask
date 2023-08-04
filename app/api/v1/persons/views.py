@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from app.api.v1.persons.services import PersonService
 from app.api.v1.persons.exceptions import *
 from app.api.v1.persons.utils import *
+from app.api.v1.small_groups.services import SmallGroupService
 import traceback
 
 import datetime
@@ -24,13 +25,51 @@ def get_person():
 def get_persons():
     try:
         persons = PersonService.get_persons()
-        return jsonify(persons)
+        profile_images = PersonService.get_persons_profile_photos()
+        return jsonify({
+            "persons":persons,
+            "profile_images":profile_images
+        })
     except PersonNotFoundException:
         return jsonify("No persons found"), 404
     except Exception:
         return jsonify("Unknown server error"), 500
-        
 
+@persons_blueprint.route("/not_admitted", methods=["GET"])
+def get_not_admitted():
+    try:
+        not_admitted = PersonService.get_not_admitted()
+        return jsonify({"data":not_admitted}), 200
+    except PersonNotFoundException:
+        return jsonify("No persons found"), 404
+    except Exception:
+        return jsonify("Unknown server error"), 500    
+
+@persons_blueprint.route("/admit", methods=["PUT"])
+def admit_person():
+    try:
+        data = request.json
+        person_id = data["id"]
+        updated_person = PersonService.admit_person(person_id)
+        return jsonify({"data": updated_person}), 201
+    except Exception:
+        traceback.print_exc()
+        return jsonify({"error":"ServerError"}), 500
+    
+@persons_blueprint.route("/admit_all", methods=["PUT"])
+def admit_all():
+    try:
+        data = request.json
+        persons_id = data["id_list"]
+        updated_persons = []
+        for person_id in persons_id:
+            updated_person = PersonService.admit_person(person_id)
+            updated_persons.append(updated_person)
+        return jsonify({"data":updated_persons}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify({"error":"ServerError"}), 500
+    
 @persons_blueprint.route("/add", methods=["POST"])
 def add_person():
     try:
@@ -63,6 +102,9 @@ def add_person():
             who_introduced=who_introduced,
             memo=memo
         )
+        print(updated_user)
+        member_data = SmallGroupService.person_to_member(updated_user)
+        SmallGroupService.create_member(member_data)
         return jsonify(updated_user), 201
     except PersonCreateFailException:
         traceback.print_exc()
@@ -150,8 +192,8 @@ def authenticate():
             set_auth_cookie(res, token, userinfo, session_id)
             return res, 200
         return jsonify({"data":userinfo}), 200
-
     except NotAuthenticatedException:
+        traceback.print_exc()
         return jsonify({"error":"NotLoggedIn"}), 401
     except Exception:
         traceback.print_exc()
@@ -177,7 +219,7 @@ def logout():
         res = jsonify({"message":"UserLoggedOut"})
         remove_auth_cookie(res)
         return res, 200
-
+    
 @persons_blueprint.route('/get_profile', methods=["GET"])
 def get_profile():
     cookies = request.cookies
@@ -187,7 +229,7 @@ def get_profile():
         return jsonify({"error":"NotLoggedIn"}), 401
     sub = cookies[sub_str]
     try:
-        image_url = PersonService.get_profile_image_link(sub)
+        image_url = PersonService.get_profile_image_link_v2(sub)
         return jsonify({"data":image_url}), 200
     except Exception:
         return jsonify({"error":"ServerError"}), 500
@@ -204,7 +246,7 @@ def upload_profile():
     if not file:
         return jsonify({"error":"NoFileFound"}), 400
     try:
-        uploaded = PersonService.upload_profile_image(sub, file)
+        uploaded = PersonService.upload_profile_image_v2(sub, file)
         if uploaded:
             return jsonify({"message":"Success"}), 201
         else:
@@ -212,5 +254,63 @@ def upload_profile():
     except Exception:
         return jsonify({"error":"ServerError"}), 500
     
+@persons_blueprint.route("/groups", methods=["GET"])
+def get_groups():
+    group_path = request.args.get("path")
+    try:
+        if group_path is None:
+            groups = PersonService.get_groups()
+            return jsonify({
+                "data":groups,
+            })
+        else:
+            group = PersonService.get_group_members_by_path(group_path)
+            return jsonify({
+                "data":group
+            }), 200
+    except GroupNotFoundException:
+        return jsonify("No groups found"), 404
+    except Exception:
+        traceback.print_exc()
+        return jsonify("Unknown server error"), 500
+    
+@persons_blueprint.route("/group/<group_id>", methods=["GET"])
+def get_group(group_id):
+    try:
+        members = PersonService.get_group_members(group_id)
+        return jsonify({
+            "data":members
+        }), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify("Unknown server error"), 500
+    
+
+    
+@persons_blueprint.route("/add_to_team", methods=["POST"])
+def add_to_team():
+    team_path = request.json["team_path"]
+    sub = request.json["sub"]
+    try:
+        added = PersonService.add_to_team(sub, team_path)
+        if added:
+            return jsonify("success"), 200
+        else:
+            return jsonify("failed"), 409
+    except Exception:
+        return jsonify({"error":"ServerError"}), 500
+
+@persons_blueprint.route("/remove_from_team", methods=["DELETE"])
+def remove_from_team():
+    team_path = request.json["team_path"]
+    sub = request.json["sub"]
+    try:
+        removed = PersonService.remove_from_team(sub, team_path)
+        if removed:
+            return jsonify("success"), 200
+        else:
+            return jsonify("failed"), 409
+    except Exception:
+        return jsonify({"error":"ServerError"}), 500
 
 

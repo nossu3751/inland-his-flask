@@ -7,6 +7,8 @@ from app.api.v1.videos.views import videos_blueprint
 from app.api.v1.small_group_notes.views import small_group_notes_blueprint
 from app.api.v1.bulletins.views import bulletins_blueprint
 from app.api.v1.persons.views import persons_blueprint
+from app.api.v1.small_groups.views import small_groups_blueprint
+from app.api.v1.events.views import events_blueprint
 
 flask_env = os.getenv("INLAND_HIS_ENV")
 
@@ -16,7 +18,7 @@ if flask_env == "development":
     origins = ["*"]
 else:
     origins = [
-        "http://localhost:4200","https://a2f8-76-90-129-219.ngrok-free.app","https://33d9-76-90-129-219.ngrok-free.app"
+        "http://localhost:4200","http://www.inlandhis.com","https://www.inlandhis.com","http://inlandhis.com","https://inlandhis.com"
     ]
 
 def create_app():
@@ -29,6 +31,8 @@ def create_app():
     app.register_blueprint(small_group_notes_blueprint)
     app.register_blueprint(bulletins_blueprint)
     app.register_blueprint(persons_blueprint)
+    app.register_blueprint(small_groups_blueprint)
+    app.register_blueprint(events_blueprint)
 
     db.init_app(app)
     keycloak_admin_wrapper.init(

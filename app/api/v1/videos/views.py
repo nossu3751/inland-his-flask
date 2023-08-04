@@ -6,9 +6,12 @@ videos_blueprint = Blueprint("videos", __name__, url_prefix="/api/v1/videos")
 
 @videos_blueprint.route("/", methods=["GET"])
 def get_videos():
-    videos = VideoService.get_all_videos()
-    video_data = format_videos_data(videos)
-    return jsonify(video_data)
+    try:
+        videos = VideoService.get_all_videos()
+        video_data = format_videos_data(videos)
+        return jsonify(video_data)
+    except Exception:
+        return jsonify({"error":"ServerError"}), 500
 
 @videos_blueprint.route("/shorts", methods=["GET"])
 def get_shorts():
@@ -20,8 +23,13 @@ def get_shorts():
 def get_live_streams():
     video_id = request.args.get('id')
     index = request.args.get('index')
+    search_str = request.args.get('search',None)
+    print(search_str)
     try:
-        if video_id is not None:
+        if search_str:
+            live_streams = VideoService.search_live_streams(search_str)
+            return jsonify({"data":format_videos_data(live_streams)}), 200
+        elif video_id is not None:
             live_stream = VideoService.get_video_by_id(video_id)
             if live_stream is not None:
                 live_stream_data = format_video_data(live_stream)  
@@ -41,7 +49,7 @@ def get_live_streams():
                 live_stream_data = format_videos_data(live_streams)
                 return jsonify(live_stream_data)
             else:
-                return jsonify({"error": "No videos found"}), 404
+                return jsonify({"error": "No videos found", "data":[]}), 200
     except Exception as e:
                 import traceback
                 traceback.print_exc()

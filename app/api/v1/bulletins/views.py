@@ -15,14 +15,14 @@ def upload_bulletin():
     date_posted = datetime.utcnow()
     sunday_date = (date_posted + timedelta(days=(6 - date_posted.weekday()))).date()
     
-    data["sunday_date"] = sunday_date
+    if "sunday_date" not in data or data["sunday_date"] == None:
+        data["sunday_date"] = sunday_date
 
     existing_bulletin = Bulletin.query.filter_by(sunday_date=sunday_date).first()
  
     if existing_bulletin:
         return jsonify({
-            "message": "The bulletin for this sunday already exists. Would you like to update the bulletin instead?",
-            "id": existing_bulletin.id
+            "error": "BulletinExists",
         }), 409
     
     new_bulletin = BulletinService.create_bulletin(data)
@@ -37,6 +37,14 @@ def get_bulletin(bulletin_id):
         abort(404, description=f"Bulletin with ID {bulletin_id} not found")
 
     return jsonify(format_bulletin_data(bulletin)), 200
+
+@bulletins_blueprint.route('/<int:bulletin_id>', methods=['DELETE'])
+def delete_bulletin(bulletin_id):
+    try:
+        BulletinService.delete_bulletin_by_id(bulletin_id)
+        return jsonify(""), 200
+    except Exception:
+        return jsonify("ServerError"), 500
 
 @bulletins_blueprint.route('/<int:bulletin_id>', methods=['PUT'])
 def update_bulletin(bulletin_id):
@@ -56,8 +64,15 @@ def update_bulletin(bulletin_id):
 def get_bulletins():
     try:
         index = request.args.get('index')
-        sunday = request.args.get('sunday')
-        if sunday:
+        sunday = request.args.get('date')
+        search = request.args.get('search')
+        if search:
+            bulletins = BulletinService.search_bulletin(search)
+            if bulletins:
+                return jsonify(format_bulletins_data(bulletins))
+            else:
+                return jsonify([]), 200
+        elif sunday:
             bulletin = BulletinService.get_bulletin_by_sunday_date(sunday)
             if bulletin:
                 return jsonify(format_bulletin_data(bulletin))
@@ -74,7 +89,7 @@ def get_bulletins():
             if bulletins:
                 return jsonify(format_bulletins_data(bulletins))
             else:
-                return jsonify({"error": "No bulletins found"}), 404
+                return jsonify({"data": [], "error":"No Bulletins Found"}), 200
     except Exception as e:
                 import traceback
                 traceback.print_exc()

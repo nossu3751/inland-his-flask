@@ -3,10 +3,10 @@ import keycloak
 from keycloak.exceptions import KeycloakGetError, KeycloakPostError, KeycloakAuthenticationError
 import traceback, uuid, base64
 from app.api.v1.persons.exceptions import *
-from app.api.v1.persons.utils import dict_from_str, str_from_dict, Session
+from app.api.v1.persons.utils import dict_from_str, str_from_dict, Session, separate_moeum
 from random import randint
 from app.api.v1.persons.decorators import keycloak_admin_authenticated
-
+from jamo import h2j, j2hcj
 class PersonService:
 
     @staticmethod
@@ -37,6 +37,33 @@ class PersonService:
             except keycloak.exceptions.KeycloakGetError:
                 raise PersonNotFoundException("Users are not found.")
             
+    @staticmethod
+    @keycloak_admin_authenticated
+    def get_groups():
+        admin = keycloak_admin_wrapper.keycloak_admin
+        if not admin:
+            raise  KeyCloakServerErrorException("There is a problem with Keycloak server.")
+        try:
+            groups = admin.get_groups()
+            admin.get_group
+            return [group for group in groups if "admin" not in group["name"]]
+        except keycloak.exceptions.KeycloakGetError:
+            raise GroupNotFoundException("Groups are not found")
+        except Exception:
+            raise KeyCloakServerErrorException("There is a problem with Keycloak server")
+
+    @staticmethod
+    @keycloak_admin_authenticated
+    def get_group_members(group_id:str):
+        admin = keycloak_admin_wrapper.keycloak_admin
+        if not admin:
+            raise  KeyCloakServerErrorException("There is a problem with Keycloak server.")
+        try:
+            members = admin.get_group_members(group_id)
+            return members
+        except Exception:
+            raise KeyCloakServerErrorException("There is a problem with Keycloak server")
+
     @staticmethod
     @keycloak_admin_authenticated
     def add_person(
@@ -71,7 +98,7 @@ class PersonService:
             new_comer_group_id = admin.get_group_by_path("/new-comer")["id"]
             print(new_comer_group_id)
             admin.group_user_add(new_comer_id, new_comer_group_id)
-
+            jamo_name= "".join(separate_moeum(c) for c in j2hcj(h2j(name)))
             attributes = {
                 "name":[name],
                 "birthday":[birthday],
@@ -87,10 +114,12 @@ class PersonService:
                 "new_comer_study_2":["not-completed"],
                 "new_comer_study_3":["not-completed"],
                 "freshis":["not-completed"],
-                "admitted":[False]
+                "admitted":[False],
+                "hangul_name":[jamo_name]
 
             }
-            return admin.update_user(new_comer_id, {"attributes": attributes})
+            admin.update_user(new_comer_id, {"attributes": attributes})
+            return admin.get_user(new_comer_id)
 
         except keycloak.exceptions.KeycloakPostError:
             raise PersonCreateFailException("Failed to create person")
@@ -105,12 +134,97 @@ class PersonService:
             admin = keycloak_admin_wrapper.keycloak_admin
             if not admin:
                 raise  KeyCloakServerErrorException("There is a problem with Keycloak server.")
-            admin.group_user_remove(id)
-            return admin.get_user_groups(id)
-        except keycloak.exceptions.KeycloakDeleteError:
-            raise GroupRemoveFailException
-        finally:
-            traceback.print_exc()
+            new_comer_group_id = admin.get_group_by_path("/new-comer")["id"]
+            admin.group_user_remove(id, new_comer_group_id)
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
+    @keycloak_admin_authenticated
+    def add_to_cell_leader(id):
+        try:
+            admin = keycloak_admin_wrapper.keycloak_admin
+            if not admin:
+                raise  KeyCloakServerErrorException("There is a problem with Keycloak server.")
+            cell_leader_group_id = admin.get_group_by_path("/cell-leader")["id"]
+            admin.group_user_add(id, cell_leader_group_id)
+            return True
+        except Exception:
+            return False
+        
+        
+    @staticmethod
+    @keycloak_admin_authenticated
+    def remove_from_cell_leader(id):
+        try:
+            admin = keycloak_admin_wrapper.keycloak_admin
+            if not admin:
+                raise  KeyCloakServerErrorException("There is a problem with Keycloak server.")
+            cell_leader_group_id = admin.get_group_by_path("/cell-leader")["id"]
+            admin.group_user_remove(id, cell_leader_group_id)
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
+    @keycloak_admin_authenticated
+    def get_group_members_by_path(path:str):
+        admin = keycloak_admin_wrapper.keycloak_admin
+        if not admin:
+            raise  KeyCloakServerErrorException("There is a problem with Keycloak server.")
+        try:
+            group_id = admin.get_group_by_path(path)["id"]
+            members = admin.get_group_members(group_id)
+            return members
+        except Exception:
+            raise KeyCloakServerErrorException("There is a problem with Keycloak server")
+        
+    @staticmethod
+    @keycloak_admin_authenticated
+    def add_to_team(id, team_path):
+        try:
+            admin = keycloak_admin_wrapper.keycloak_admin
+            if not admin:
+                raise  KeyCloakServerErrorException("There is a problem with Keycloak server.")
+            team_group_id = admin.get_group_by_path(team_path)["id"]
+            admin.group_user_add(id, team_group_id)
+            return True
+        except Exception:
+            return False
+        
+    @staticmethod
+    @keycloak_admin_authenticated
+    def remove_from_team(id, team_path):
+        try:
+            admin = keycloak_admin_wrapper.keycloak_admin
+            if not admin:
+                raise  KeyCloakServerErrorException("There is a problem with Keycloak server.")
+            team_group_id = admin.get_group_by_path(team_path)["id"]
+            admin.group_user_remove(id, team_group_id)
+            return True
+        except Exception:
+            return False
+        
+    @staticmethod
+    @keycloak_admin_authenticated
+    def get_not_admitted():
+        try:
+            admin = keycloak_admin_wrapper.keycloak_admin
+            if not admin:
+                return KeyCloakServerErrorException("There is a problem with Keycloak server.")
+            users = PersonService.get_persons()
+            not_admitted = []
+            for user in users:
+                print(user)
+                if "attributes" not in user:
+                    continue
+                attributes = user.get("attributes")
+                if "admitted" in attributes and attributes["admitted"][0] == "false":
+                    not_admitted.append(user)
+            return not_admitted
+        except Exception:
+            raise PersonNotFoundException("Cannot find persons")
         
     @staticmethod
     @keycloak_admin_authenticated
@@ -120,15 +234,37 @@ class PersonService:
             if not admin:
                 return KeyCloakServerErrorException("There is a problem with Keycloak server.")
             attributes = admin.get_user(id).get("attributes")
+            print(attributes)
             attributes["admitted"] = [True]
-            admin.update_user(id, attributes)
+            
+            return admin.update_user(id, {"attributes": attributes})
+        
         except keycloak.exceptions.KeycloakPutError:
+            traceback.print_exc()
             raise AttributeModifyFailException
         except Exception:
-            return None
-        finally:
             traceback.print_exc()
 
+    @staticmethod 
+    def get_persons_with_sub(*subs):
+        if len(subs) == 1:
+            if isinstance(subs[0], list):
+                subs = subs[0]
+            elif isinstance(subs[0], str):
+                subs = [subs[0]]
+        try:
+            persons = PersonService.get_persons() 
+            if not subs:
+                return persons
+            res = [person for person in persons if person["id"] in subs]
+            return res
+        except Exception:
+            return []
+        #     person_map = {person["id"]:person for person in persons}
+        #     res = [person_map[sub] for sub in subs]
+        #     return res
+        # except Exception:
+        #     return []
 
     @staticmethod
     @keycloak_admin_authenticated
@@ -234,7 +370,7 @@ class PersonService:
 
     @staticmethod
     def authenticate_person(access_token:str, refresh_token:str, sub:str="", session_id:str=""):
-        print(access_token, refresh_token, sub, session_id)
+        # print(access_token, refresh_token, sub, session_id)
         redis = redis_wrapper.redis
         keycloak_openid = keycloak_admin_wrapper.openid
         if not keycloak_openid:
@@ -261,7 +397,63 @@ class PersonService:
                 raise NotAuthenticatedException("Couldn't authenticate.")
         except Exception:
             traceback.print_exc()
+
+    @staticmethod
+    def get_file_name_with_profile_code(sub):
+        redis = redis_wrapper.redis
+        if not redis:
+            raise RedisServerErrorException("There's something wrong with redis server")
+        try:
+            profile_code_key = f"{sub}_profile_code"
+            if redis.exists(profile_code_key):
+                prev_profile_code = redis.get(profile_code_key)
+                prev_file_name = f'profile_images/{sub}_{prev_profile_code}.jpg'
+                return prev_file_name, profile_code_key
+            else:
+                return None, None
+        except Exception:
+            return None, None
+
+    @staticmethod
+    def upload_profile_image_v2(sub, file):
+        s3 = s3_wrapper.s3
+        bucket = s3_wrapper.bucket_name
+        if s3 is None:
+            raise S3ServerErrorException
+        redis = redis_wrapper.redis
+        if not redis: 
+            raise RedisServerErrorException("There's something wrong with redis server")
+        try:
+            profile_key = f"{sub}_profile_file"
         
+            if redis.exists(profile_key):
+                
+                prev_file_name = redis.get(profile_key)
+                print("previous image existed!", prev_file_name)
+                redis.delete(profile_key)
+                _ = s3.delete_object(
+                    Bucket=bucket,
+                    Key=prev_file_name
+                )
+
+                
+            code = uuid.uuid4().hex
+            file_name = f'profile_images/{sub}_{code}.jpg'
+            s3.upload_fileobj(
+                file,
+                bucket,
+                file_name,
+                ExtraArgs={
+                    'CacheControl': 'public, max-age=31556926',
+                    'ACL':'public-read'
+                }
+            )
+            redis.set(profile_key, file_name)
+            return True
+            
+        except Exception:
+            traceback.print_exc()
+
     @staticmethod
     def upload_profile_image(sub, file):
         s3 = s3_wrapper.s3
@@ -303,8 +495,24 @@ class PersonService:
             traceback.print_exc()
 
     @staticmethod
+    def get_profile_image_link_v2(sub):
+        bucket = s3_wrapper.bucket_name
+        if not bucket:
+            raise S3ServerErrorException("There's something wrong with s3 server")
+        redis = redis_wrapper.redis
+        if not redis:
+            raise RedisServerErrorException("There's something wrong with redis server")
+        profile_key = f"{sub}_profile_file"
+        target_image = redis.get(profile_key)
+        # print("getting from redis!", target_image)
+        if target_image is not None:
+            image_url = f"https://{bucket}.s3.amazonaws.com/{target_image}"
+            return image_url
+        return None
+
+
+    @staticmethod
     def get_profile_image_link(sub):
-        
         
         redis = redis_wrapper.redis
         if not redis:
@@ -335,8 +543,23 @@ class PersonService:
             traceback.print_exc()
             raise S3ServerErrorException("Something went wrong with S3 connection")
 
-
+    @staticmethod
+    def get_persons_profile_photos(persons_data=None):
+        if persons_data is None:
+            persons_data = PersonService.get_persons()
+        profile_image_links = {}
+        try:
+            for person_data in persons_data:
+                sub = person_data["id"]
+                try:
+                    profile_image_links[sub] = PersonService.get_profile_image_link_v2(sub)
+                except Exception:
+                    profile_image_links[sub] = None
+            return profile_image_links
+        except Exception:
+            return {}
         
+    
 
 
             

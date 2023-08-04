@@ -1,5 +1,7 @@
-import datetime, json, base64
+import json, base64
 from flask import Response, Request
+from datetime import datetime, timedelta
+
 
 class Session():
     def __init__(self, token:dict, userinfo:dict, session_id:str):
@@ -8,32 +10,38 @@ class Session():
         self.session_id = session_id
 
 def get_expiry_string(expires_in:int) -> str:
-    current_time_utc = datetime.datetime.utcnow()
-    expiry_time_utc = current_time_utc + datetime.timedelta(seconds=expires_in)
+    current_time_utc = datetime.utcnow()
+    expiry_time_utc = current_time_utc + timedelta(seconds=expires_in)
     expiry_time_string = expiry_time_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
     return expiry_time_string
 
 def expired(expiry_time_string:str) -> bool:
-    expiry_time_utc = datetime.datetime.strptime(expiry_time_string, "%Y-%m-%dT%H:%M:%SZ")
-    current_time_utc = datetime.datetime.utcnow()
+    expiry_time_utc = datetime.strptime(expiry_time_string, "%Y-%m-%dT%H:%M:%SZ")
+    current_time_utc = datetime.utcnow()
     return current_time_utc >= expiry_time_utc
    
 def set_auth_cookie(res:Response, token:dict, userinfo:dict, session_id:str):
     
-    
     token_type = token["token_type"]
     refresh_token = token["refresh_token"]
     access_token = token["access_token"]
+    expires_in = datetime.now() + timedelta(seconds=token["refresh_expires_in"])
     sub = userinfo["sub"]
     groups = userinfo["group_membership"]
     
-    res.set_cookie("inland_his_token_type", token_type, httponly=True)
-    res.set_cookie("inland_his_refresh_token", refresh_token, httponly=True)
-    res.set_cookie("inland_his_access_token", access_token, httponly=True)
-    res.set_cookie("inland_his_session_id", session_id, httponly=True)
-    res.set_cookie("inland_his_sub", sub, httponly=True)
-    res.set_cookie("inland_his_groups", str_from_dict(groups), httponly=True)
-
+    print("expires in?:", expires_in)
+    res.set_cookie("inland_his_token_type", token_type, httponly=True, expires=expires_in)
+    res.set_cookie("inland_his_refresh_token", refresh_token, httponly=True, expires=expires_in)
+    res.set_cookie("inland_his_access_token", access_token, httponly=True, expires=expires_in)
+    res.set_cookie("inland_his_session_id", session_id, httponly=True, expires=expires_in)
+    res.set_cookie("inland_his_sub", sub, httponly=True, expires=expires_in)
+    res.set_cookie("inland_his_groups", str_from_dict(groups), httponly=True, expires=expires_in)
+    # res.set_cookie("inland_his_token_type", token_type, httponly=True)
+    # res.set_cookie("inland_his_refresh_token", refresh_token, httponly=True)
+    # res.set_cookie("inland_his_access_token", access_token, httponly=True)
+    # res.set_cookie("inland_his_session_id", session_id, httponly=True)
+    # res.set_cookie("inland_his_sub", sub, httponly=True)
+    # res.set_cookie("inland_his_groups", str_from_dict(groups), httponly=True)
 def remove_auth_cookie(res:Response):
     res.set_cookie("inland_his_token_type", "", expires=0)
     res.set_cookie("inland_his_refresh_token", "", expires=0)
@@ -72,6 +80,21 @@ def binary_to_img(binary:str) -> str:
 def img_to_binary(base64str:str) -> str:
     binary_data = base64.b64decode(base64str)
     return binary_data
+
+complex_korean_vowels = {
+    'ㅘ':'ㅗㅏ',
+    'ㅙ':'ㅗㅐ',
+    'ㅚ':'ㅗㅣ',
+    'ㅝ':'ㅜㅓ',
+    'ㅞ':'ㅜㅔ',
+    'ㅟ':'ㅜㅣ',
+    'ㅢ':'ㅡㅣ'
+}
+    
+def separate_moeum(hangul:str):
+    if hangul not in complex_korean_vowels:
+        return hangul
+    return complex_korean_vowels[hangul]
 
     
     

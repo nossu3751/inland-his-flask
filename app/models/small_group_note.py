@@ -8,5 +8,6 @@ class SmallGroupNote(db.Model):
     html_template_data = db.Column(JSON, nullable=False)
     sunday_date = db.Column(db.Date, nullable=False)
     
+    
     def __repr__(self):
         return f'<SmallGroupNote {self.title}>'

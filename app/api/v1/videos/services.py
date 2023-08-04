@@ -51,3 +51,12 @@ class VideoService:
                 .offset(index)
                 .limit(1))
         return db.session.execute(stmt).scalar_one_or_none()
+
+    @staticmethod
+    def search_live_streams(search_str):
+        
+        results = db.session.query(Video).filter(
+            Video.video_type == "live_streams", 
+            Video.title.contains(search_str)).all()
+        print(results)
+        return results

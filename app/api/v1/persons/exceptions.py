@@ -7,6 +7,7 @@ class NoProfileImageException(Exception):pass
 class PersonCreateFailException(Exception): pass
 class PersonModifyFailException(Exception): pass
 class GroupRemoveFailException(Exception): pass
+class GroupNotFoundException(Exception):pass
 class AttributeModifyFailException(Exception):pass
 class SendVerificationFailException(Exception):pass
 class PhoneNumberNotFoundException(Exception):pass
