@@ -2,9 +2,11 @@ from datetime import datetime
 import traceback
 from app.models.poll import Poll
 from app.api.v1.polls.exceptions import *
+from app.api.v1.polls.utils import format_poll_data
 from app.extensions import db
 from sqlalchemy import extract, select
 from sqlalchemy.exc import IntegrityError
+
 
 class PollService:
 
@@ -36,7 +38,7 @@ class PollService:
             ended = end <= datetime.now()
             poll_data["user_created"] = user_created
             poll_data["start"] = start
-            poll_data["end"] = start
+            poll_data["end"] = end
             poll_data["ended"] = ended
             poll_data["voted_persons"] = {}
             new_poll = Poll(**poll_data)
@@ -65,11 +67,14 @@ class PollService:
     def cast_vote(poll_id, person_sub, option_id):
         try:
             poll = PollService.get_poll(poll_id)
+            print("poll", poll)
 
             if poll:
-                voted_person = poll.voted_person
-                voted_person[person_sub] = option_id
-                poll.voted_person = voted_person
+                voted_persons = format_poll_data(poll)["voted_persons"]
+                print(voted_persons)
+                voted_persons[person_sub] = option_id
+                print(voted_persons)
+                poll.voted_persons = voted_persons
             db.session.commit()
             return poll_id
         except (IntegrityError, Exception):

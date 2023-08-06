@@ -38,7 +38,7 @@ def cast_vote():
         if id:
             poll = PollService.cast_vote(poll_id, sub, selected)
             return jsonify({
-                "message":f"poll {id} ended",
+                "message":f"poll {id} selected",
                 "data":poll
             }), 201
         else:
