@@ -71,6 +71,7 @@ class TwilioWrapper:
         self.twilio = None
         self.from_phone_number = None
     def init(self, account_sid, auth_token, from_phone):
+        print(account_sid, auth_token, from_phone)
         self.twilio = Client(account_sid, auth_token)
         self.from_phone_number = from_phone
 

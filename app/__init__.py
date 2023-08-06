@@ -40,6 +40,14 @@ def create_app():
     app.register_blueprint(events_blueprint)
     app.register_blueprint(polls_blueprint)
 
+    TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+    TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+    TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+
+    print(TWILIO_ACCOUNT_SID)
+    print(TWILIO_AUTH_TOKEN)
+    print(TWILIO_PHONE_NUMBER)
+    
     db.init_app(app)
     keycloak_admin_wrapper.init(
         server_url=os.getenv('KEYCLOAK_ADMIN_SERVER_DEV') if flask_env == 'development' else os.getenv('KEYCLOAK_ADMIN_SERVER_PROD'),
