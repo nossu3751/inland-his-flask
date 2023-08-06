@@ -124,6 +124,25 @@ def create_small_group():
         traceback.print_exc()
         return jsonify({"ServerError"}), 500
     
+@small_groups_blueprint.route('/contacts',methods=['GET'])
+def get_contacts():
+    small_group_id = request.args.get("id")
+    try:
+        if small_group_id:
+            members = SmallGroupService.get_members_by_group_id(small_group_id)
+        else:
+            members = SmallGroupService.get_all_members()
+        member_sub_id_map = {member.sub:member.id for member in members if member.sub is not None}
+        member_subs = list(member_sub_id_map.keys())
+        members_person_data = PersonService.get_persons_with_sub(member_subs)
+        members_contact = {member_sub_id_map[member["id"]]:member["username"] for member in members_person_data}
+        return jsonify({
+            "data":members_contact
+        }), 200
+    
+    except Exception:
+        return jsonify({"contacts":{}, "error":"ServerError"}), 500
+        
 @small_groups_blueprint.route('/my_small_group',methods=['GET'])
 def get_my_small_group():
     try:

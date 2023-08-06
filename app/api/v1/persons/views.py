@@ -292,15 +292,18 @@ def add_to_team():
     team_path = request.json["team_path"]
     sub = request.json["sub"]
     try:
-        added = PersonService.add_to_team(sub, team_path)
+        
+        added= PersonService.add_to_team(sub, team_path)
         if added:
+
             return jsonify("success"), 200
         else:
             return jsonify("failed"), 409
+        
     except Exception:
         return jsonify({"error":"ServerError"}), 500
 
-@persons_blueprint.route("/remove_from_team", methods=["DELETE"])
+@persons_blueprint.route("/remove_from_team", methods=["POST"])
 def remove_from_team():
     team_path = request.json["team_path"]
     sub = request.json["sub"]

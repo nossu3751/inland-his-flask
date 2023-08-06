@@ -1,0 +1,3 @@
+class PollNotCreatedException(Exception):pass
+class PollNotModifiedException(Exception):pass
+class UserNotMatchingException(Exception):pass

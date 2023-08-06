@@ -9,6 +9,7 @@ from app.api.v1.bulletins.views import bulletins_blueprint
 from app.api.v1.persons.views import persons_blueprint
 from app.api.v1.small_groups.views import small_groups_blueprint
 from app.api.v1.events.views import events_blueprint
+from app.api.v1.polls.views import polls_blueprint
 
 flask_env = os.getenv("INLAND_HIS_ENV")
 
@@ -18,7 +19,11 @@ if flask_env == "development":
     origins = ["*"]
 else:
     origins = [
-        "http://localhost:4200","http://www.inlandhis.com","https://www.inlandhis.com","http://inlandhis.com","https://inlandhis.com"
+        "http://localhost:4200",
+        "http://www.inlandhis.com",
+        "https://www.inlandhis.com",
+        "http://inlandhis.com",
+        "https://inlandhis.com"
     ]
 
 def create_app():
@@ -33,6 +38,7 @@ def create_app():
     app.register_blueprint(persons_blueprint)
     app.register_blueprint(small_groups_blueprint)
     app.register_blueprint(events_blueprint)
+    app.register_blueprint(polls_blueprint)
 
     db.init_app(app)
     keycloak_admin_wrapper.init(
