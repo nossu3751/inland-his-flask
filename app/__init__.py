@@ -44,6 +44,12 @@ def create_app():
     TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
     TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
     TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+    KEYCLOAK_ADMIN_SERVER_DEV = os.getenv('KEYCLOAK_ADMIN_SERVER_DEV')
+    KEYCLOAK_USER_NAME = os.getenv('KEYCLOAK_ADMIN_USERNAME')
+    KEYCLOAK_PASSWORD = os.getenv('KEYCLOAK_ADMIN_PASSWORD')
+    KEYCLOAK_REALM_NAME = os.getenv('KEYCLOAK_ADMIN_REALM')
+    KEYCLOAK_CLIENT_ID = os.getenv('KEYCLOAK_ADMIN_CLIENT')
+    KEYCLOAK_USER_PASSWORD = os.getenv('KEYCLOAK_DEFAULT_PASSWORD')
 
     print(TWILIO_ACCOUNT_SID)
     print(TWILIO_AUTH_TOKEN)
@@ -51,7 +57,7 @@ def create_app():
     
     db.init_app(app)
     keycloak_admin_wrapper.init(
-        server_url=os.getenv('KEYCLOAK_ADMIN_SERVER_DEV') if flask_env == 'development' else os.getenv('KEYCLOAK_ADMIN_SERVER_PROD'),
+        server_url=os.getenv('KEYCLOAK_ADMIN_SERVER_DEV'),
         username=os.getenv('KEYCLOAK_ADMIN_USERNAME'),
         password=os.getenv('KEYCLOAK_ADMIN_PASSWORD'),
         realm_name=os.getenv('KEYCLOAK_ADMIN_REALM'),
