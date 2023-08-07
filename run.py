@@ -1,4 +1,7 @@
 from app import create_app
+import os 
+os.umask(0o002)
+
 
 app = create_app()
 
