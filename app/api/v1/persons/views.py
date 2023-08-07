@@ -5,9 +5,12 @@ from app.api.v1.persons.utils import *
 from app.api.v1.small_groups.services import SmallGroupService
 import traceback
 
-import datetime
+
+from app.utils import setup_logger
 
 persons_blueprint = Blueprint("persons", __name__, url_prefix="/api/v1/persons")
+
+logger = setup_logger('persons', '/var/logs/inland-his-flask/persons.log')
 
 @persons_blueprint.route("/user", methods=["GET"])
 def get_person():
@@ -16,8 +19,10 @@ def get_person():
         person = PersonService.get_person(user_id)
         return jsonify({"data": person}), 200
     except PersonNotFoundException:
+        logger.info(f"Person Not Found: {traceback.format_exc()}")
         return jsonify({"error": "PersonNotFound"}), 404
     except:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify({"error":"ServerError"}), 500
 
 
@@ -31,8 +36,10 @@ def get_persons():
             "profile_images":profile_images
         })
     except PersonNotFoundException:
+        logger.info(f"Person Not Found: {traceback.format_exc()}")
         return jsonify("No persons found"), 404
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify("Unknown server error"), 500
 
 @persons_blueprint.route("/not_admitted", methods=["GET"])
@@ -41,8 +48,10 @@ def get_not_admitted():
         not_admitted = PersonService.get_not_admitted()
         return jsonify({"data":not_admitted}), 200
     except PersonNotFoundException:
+        logger.info(f"Persons Not found: {traceback.format_exc()}")
         return jsonify("No persons found"), 404
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify("Unknown server error"), 500    
 
 @persons_blueprint.route("/admit", methods=["PUT"])
@@ -54,6 +63,7 @@ def admit_person():
         return jsonify({"data": updated_person}), 201
     except Exception:
         traceback.print_exc()
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify({"error":"ServerError"}), 500
     
 @persons_blueprint.route("/admit_all", methods=["PUT"])
@@ -68,6 +78,7 @@ def admit_all():
         return jsonify({"data":updated_persons}), 200
     except Exception:
         traceback.print_exc()
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify({"error":"ServerError"}), 500
     
 @persons_blueprint.route("/add", methods=["POST"])
@@ -108,11 +119,14 @@ def add_person():
         return jsonify(updated_user), 201
     except PersonCreateFailException:
         traceback.print_exc()
+        logger.info(f"Person Create Fail: {traceback.format_exc()}")
         return jsonify("Wasn't able to add new person. "), 409
     except PersonModifyFailException:
+        logger.info(f"Person Modify Fail: {traceback.format_exc()}")
         traceback.print_exc()
         return jsonify("Wasn't able to add new person. "), 409
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify("Unknown server error"), 500
         
 @persons_blueprint.route("/send_verification", methods=["POST"])
@@ -130,12 +144,16 @@ def send_verification():
             traceback.print_exc()
             return jsonify({"error":"ServerError"}), 500
     except PhoneNumberNotFoundException:
+        logger.info(f"Phone number not found: {traceback.format_exc()}")
         return jsonify({"error":"PhoneNumberNotFound"}), 409
     except DifferentNameException:
+        logger.info(f"Different name: {traceback.format_exc()}")
         return jsonify({"error":"NameMatchNotFound"}), 409
     except PersonNotAdmittedException:
+        logger.info(f"Person Not Admitted: {traceback.format_exc()}")
         return jsonify({"error":"PersonNotAdmittedYet"}), 409
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         traceback.print_exc()
         return jsonify({"error":"VerificationNotSent"}), 500
     
@@ -159,8 +177,10 @@ def verify():
         else:
             return jsonify({"error":"WrongVerificationNumber"}), 401
     except VerificationExpiredException:
+        logger.info(f"Verification Expired: {traceback.format_exc()}")
         return jsonify({"error":"VerificationExpired"}), 401
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         traceback.print_exc()
         return jsonify({"error":"ServerError"}), 500
     
@@ -193,9 +213,11 @@ def authenticate():
             return res, 200
         return jsonify({"data":userinfo}), 200
     except NotAuthenticatedException:
+        logger.info(f"Not authenticated: {traceback.format_exc()}")
         traceback.print_exc()
         return jsonify({"error":"NotLoggedIn"}), 401
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         traceback.print_exc()
         return jsonify({"error":"ServerError"}), 500
     
@@ -213,6 +235,7 @@ def logout():
     try:
         _ = PersonService.logout(refresh_token, sub, session_id)
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         traceback.print_exc()
         return jsonify({"error":"ServerError"}), 500
     finally:
@@ -232,9 +255,10 @@ def get_profile():
         image_url = PersonService.get_profile_image_link_v2(sub)
         return jsonify({"data":image_url}), 200
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify({"error":"ServerError"}), 500
 
-@persons_blueprint.route("/upload_profile", methods=["POST"])
+@persons_blueprint.route("/upload_profile/", methods=["POST"])
 def upload_profile():
     if 'image' not in request.files:
         return jsonify({"error":"NoFileFound"}), 400
@@ -244,6 +268,7 @@ def upload_profile():
     sub = cookies[sub_str]
     file = request.files['image']
     if not file:
+        logger.info(f"Image file is not uploaded. Can't find image file from request")
         return jsonify({"error":"NoFileFound"}), 400
     try:
         uploaded = PersonService.upload_profile_image_v2(sub, file)
@@ -252,6 +277,7 @@ def upload_profile():
         else:
             return jsonify({"message":"UploadFailed"}), 500
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify({"error":"ServerError"}), 500
     
 @persons_blueprint.route("/groups", methods=["GET"])
@@ -269,8 +295,10 @@ def get_groups():
                 "data":group
             }), 200
     except GroupNotFoundException:
+        logger.info(f"Group not found: {traceback.format_exc()}")
         return jsonify("No groups found"), 404
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         traceback.print_exc()
         return jsonify("Unknown server error"), 500
     
@@ -282,6 +310,7 @@ def get_group(group_id):
             "data":members
         }), 200
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         traceback.print_exc()
         return jsonify("Unknown server error"), 500
     
@@ -301,6 +330,7 @@ def add_to_team():
             return jsonify("failed"), 409
         
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify({"error":"ServerError"}), 500
 
 @persons_blueprint.route("/remove_from_team", methods=["POST"])
@@ -314,6 +344,7 @@ def remove_from_team():
         else:
             return jsonify("failed"), 409
     except Exception:
+        logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify({"error":"ServerError"}), 500
 
 
