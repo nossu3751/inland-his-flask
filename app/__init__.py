@@ -13,7 +13,6 @@ from app.api.v1.polls.views import polls_blueprint
 from dotenv import load_dotenv
 
 flask_env = os.getenv("INLAND_HIS_ENV")
-load_dotenv()
 
 if flask_env == "development":
     origins = ["*"]
@@ -27,6 +26,7 @@ else:
     ]
 
 def create_app():
+    load_dotenv()
     app = Flask(__name__)
     app.url_map.strict_slashes = False
     print(origins)
