@@ -10,7 +10,7 @@ from app.utils import setup_logger
 
 persons_blueprint = Blueprint("persons", __name__, url_prefix="/api/v1/persons")
 
-logger = setup_logger('persons', '/var/logs/inland-his-flask/persons.log')
+logger = setup_logger('persons', '/var/log/inland-his-flask/persons.log')
 
 @persons_blueprint.route("/user", methods=["GET"])
 def get_person():

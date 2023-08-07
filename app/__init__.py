@@ -11,15 +11,6 @@ from app.api.v1.small_groups.views import small_groups_blueprint
 from app.api.v1.events.views import events_blueprint
 from app.api.v1.polls.views import polls_blueprint
 from dotenv import load_dotenv
-# import logging
-
-# def log_handler
-# log_directory = '/var/logs/inland-his-flask'
-# if not os.path.exists(log_directory):
-#     os.makedirs(log_directory)
-
-# logging.basicConfig()
-
 
 flask_env = os.getenv("INLAND_HIS_ENV")
 load_dotenv()
