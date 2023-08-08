@@ -258,7 +258,7 @@ def get_profile():
         logger.info(f"Server Error: {traceback.format_exc()}")
         return jsonify({"error":"ServerError"}), 500
 
-@persons_blueprint.route("/upload_profile/", methods=["POST"])
+@persons_blueprint.route("/upload_profile", methods=["POST"])
 def upload_profile():
     logger.info("trying to upload profile")
     print("trying to upload profile")
