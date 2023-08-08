@@ -15,5 +15,5 @@ def setup_logger(name, log_file, level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
-
+    logger.info(f"{name} logger initialized!")
     return logger
