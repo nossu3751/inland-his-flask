@@ -261,6 +261,7 @@ def get_profile():
 @persons_blueprint.route("/upload_profile/", methods=["POST"])
 def upload_profile():
     logger.info("trying to upload profile")
+    print("trying to upload profile")
     if 'image' not in request.files:
         logger.info("image not in request.files")
         return jsonify({"error":"NoFileFound"}), 400
@@ -269,6 +270,7 @@ def upload_profile():
     sub_str = "inland_his_sub"
     
     sub = cookies[sub_str]
+    print("sub retrieved")
     logger.info("sub retrieved")
     file = request.files['image']
     if not file:
