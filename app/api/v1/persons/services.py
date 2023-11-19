@@ -296,14 +296,18 @@ class PersonService:
         if not redis:
             raise RedisServerErrorException("There's something wrong with redis server")
         
-        verification_number = randint(100000, 999999)
+        verification_number = 111111
+        # verification_number = randint(100000, 999999)
 
         try:
-            _ = twilio.messages.create(
-                body=f'인랜드히즈 앱 로그인 6자리 인증번호입니다: {verification_number}. (이 번호는 문자인증용 번호입니다. 답장을 받을 수 없습니다)',
-                from_=from_phone_number,
-                to=phone_number
-            )
+            '''
+                There is some error with twilio api right now; setting verification to default number
+            '''
+            # _ = twilio.messages.create(
+            #     body=f'인랜드히즈 앱 로그인 6자리 인증번호입니다: {verification_number}. (이 번호는 문자인증용 번호입니다. 답장을 받을 수 없습니다)',
+            #     from_=from_phone_number,
+            #     to=phone_number
+            # )
             return redis.set(f"{phone_number}_verification", str(verification_number), ex=301)
         except Exception:
             raise SendVerificationFailException("Failed to send verification request.")
