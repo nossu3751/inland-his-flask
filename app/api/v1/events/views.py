@@ -61,11 +61,13 @@ def add_event():
         traceback.print_exc()
         return jsonify("ServerError"), 500
 
-@events_blueprint.route("/delete/<event_id>/", methods=['DELETE'])
-def delete_event(event_id):
+@events_blueprint.route("/delete", methods=['DELETE'])
+def delete_event():
+    event_id = request.args["eventId"]
     try:
         EventService.delete_events_by_event_id(event_id)
-        return jsonify({"message":"event deleted"})
+        events = EventService.get_events()
+        return jsonify({"data": format_events_data(events)}), 200
     except Exception:
         traceback.print_exc()
         return jsonify("ServerError"), 500
