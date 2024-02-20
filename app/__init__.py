@@ -2,7 +2,8 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from config import Config
-from .extensions import db, keycloak_admin_wrapper, redis_wrapper, twilio_wrapper, s3_wrapper
+# from .extensions import db, keycloak_admin_wrapper, redis_wrapper, twilio_wrapper, s3_wrapper
+from .extensions import db, keycloak_admin_wrapper, redis_wrapper, s3_wrapper
 from app.api.v1.videos.views import videos_blueprint
 from app.api.v1.small_group_notes.views import small_group_notes_blueprint
 from app.api.v1.bulletins.views import bulletins_blueprint
