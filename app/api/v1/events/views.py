@@ -61,7 +61,7 @@ def add_event():
         traceback.print_exc()
         return jsonify("ServerError"), 500
 
-@events_blueprint.route("/delete/<event_id>", methods=['DELETE'])
+@events_blueprint.route("/<event_id>", methods=['DELETE'])
 def delete_event(event_id):
     event_id = request.args["eventId"]
     try:
