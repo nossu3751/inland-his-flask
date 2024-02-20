@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from redis import Redis
-from twilio.rest import Client
+# from twilio.rest import Client
 import boto3
 from botocore.config import Config
 
@@ -66,18 +66,18 @@ class RedisWrapper:
     def init(self, host, port, decode_response):
         self.redis = Redis(host=host, port=port, decode_responses=decode_response)
 
-class TwilioWrapper:
-    def __init__(self):
-        self.twilio = None
-        self.from_phone_number = None
-    def init(self, account_sid, auth_token, from_phone):
-        print(account_sid, auth_token, from_phone)
-        self.twilio = Client(account_sid, auth_token)
-        self.from_phone_number = from_phone
+# class TwilioWrapper:
+#     def __init__(self):
+#         self.twilio = None
+#         self.from_phone_number = None
+#     def init(self, account_sid, auth_token, from_phone):
+#         print(account_sid, auth_token, from_phone)
+#         self.twilio = Client(account_sid, auth_token)
+#         self.from_phone_number = from_phone
 
 keycloak_admin_wrapper =  KeycloakAdminWrapper()
 redis_wrapper = RedisWrapper()
 db = SQLAlchemy()
-twilio_wrapper = TwilioWrapper()
+# twilio_wrapper = TwilioWrapper()
 s3_wrapper = S3Wrapper()
 

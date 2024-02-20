@@ -1,4 +1,5 @@
-from app.extensions import keycloak_admin_wrapper, redis_wrapper, twilio_wrapper, s3_wrapper
+# from app.extensions import keycloak_admin_wrapper, redis_wrapper, twilio_wrapper, s3_wrapper
+from app.extensions import keycloak_admin_wrapper, redis_wrapper, s3_wrapper
 import keycloak
 from keycloak.exceptions import KeycloakGetError, KeycloakPostError, KeycloakAuthenticationError
 import traceback, uuid, base64
@@ -287,12 +288,12 @@ class PersonService:
             raise PersonNotAdmittedException("This Person is not admitted yet.")
         
         
-        twilio = twilio_wrapper.twilio
-        from_phone_number = twilio_wrapper.from_phone_number
+        # twilio = twilio_wrapper.twilio
+        # from_phone_number = twilio_wrapper.from_phone_number
         redis = redis_wrapper.redis
         
-        if not twilio:
-            raise TwilioServerErrorException("There's something wrong with Twilio server")
+        # if not twilio:
+        #     raise TwilioServerErrorException("There's something wrong with Twilio server")
         if not redis:
             raise RedisServerErrorException("There's something wrong with redis server")
         

@@ -69,11 +69,11 @@ def create_app():
         port=os.getenv('REDIS_PORT'),
         decode_response=True
     )
-    twilio_wrapper.init(
-        account_sid=os.getenv('TWILIO_ACCOUNT_SID'),
-        auth_token=os.getenv('TWILIO_AUTH_TOKEN'),
-        from_phone=os.getenv('TWILIO_PHONE_NUMBER')
-    )
+    # twilio_wrapper.init(
+    #     account_sid=os.getenv('TWILIO_ACCOUNT_SID'),
+    #     auth_token=os.getenv('TWILIO_AUTH_TOKEN'),
+    #     from_phone=os.getenv('TWILIO_PHONE_NUMBER')
+    # )
     s3_wrapper.init(
         access_key=os.getenv('AWS_S3_ACCESS_KEY'),
         secret_key=os.getenv('AWS_S3_SECRET_KEY'),
