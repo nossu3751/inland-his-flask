@@ -63,7 +63,6 @@ def add_event():
 
 @events_blueprint.route("/<event_id>", methods=['DELETE'])
 def delete_event(event_id):
-    event_id = request.args["eventId"]
     try:
         EventService.delete_events_by_event_id(event_id)
         events = EventService.get_events()
