@@ -11,6 +11,7 @@ from app.api.v1.persons.views import persons_blueprint
 from app.api.v1.small_groups.views import small_groups_blueprint
 from app.api.v1.events.views import events_blueprint
 from app.api.v1.polls.views import polls_blueprint
+from app.api.v1.bible_challenge.views import bible_challenges_blueprint
 from dotenv import load_dotenv
 
 flask_env = os.getenv("INLAND_HIS_ENV")
@@ -41,6 +42,7 @@ def create_app():
     app.register_blueprint(small_groups_blueprint)
     app.register_blueprint(events_blueprint)
     app.register_blueprint(polls_blueprint)
+    app.register_blueprint(bible_challenges_blueprint)
 
     TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
     TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
