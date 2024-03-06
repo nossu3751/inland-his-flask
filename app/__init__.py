@@ -2,7 +2,6 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from config import Config
-# from .extensions import db, keycloak_admin_wrapper, redis_wrapper, twilio_wrapper, s3_wrapper
 from .extensions import db, keycloak_admin_wrapper, redis_wrapper, s3_wrapper
 from app.api.v1.videos.views import videos_blueprint
 from app.api.v1.small_group_notes.views import small_group_notes_blueprint
@@ -12,6 +11,7 @@ from app.api.v1.small_groups.views import small_groups_blueprint
 from app.api.v1.events.views import events_blueprint
 from app.api.v1.polls.views import polls_blueprint
 from app.api.v1.bible_challenge.views import bible_challenges_blueprint
+from app.api.v1.small_group_discussions.views import small_group_discussions_blueprint
 from dotenv import load_dotenv
 
 flask_env = os.getenv("INLAND_HIS_ENV")
@@ -24,7 +24,9 @@ else:
         "http://www.inlandhis.com",
         "https://www.inlandhis.com",
         "http://inlandhis.com",
-        "https://inlandhis.com"
+        "https://inlandhis.com",
+        "https://admin.inlandhis.com",
+        "http://localhost:8501"
     ]
 
 def create_app():
@@ -43,22 +45,10 @@ def create_app():
     app.register_blueprint(events_blueprint)
     app.register_blueprint(polls_blueprint)
     app.register_blueprint(bible_challenges_blueprint)
-
-    TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
-    TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
-    TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
-    KEYCLOAK_ADMIN_SERVER_DEV = os.getenv('KEYCLOAK_ADMIN_SERVER_DEV')
-    KEYCLOAK_USER_NAME = os.getenv('KEYCLOAK_ADMIN_USERNAME')
-    KEYCLOAK_PASSWORD = os.getenv('KEYCLOAK_ADMIN_PASSWORD')
-    KEYCLOAK_REALM_NAME = os.getenv('KEYCLOAK_ADMIN_REALM')
-    KEYCLOAK_CLIENT_ID = os.getenv('KEYCLOAK_ADMIN_CLIENT')
-    KEYCLOAK_USER_PASSWORD = os.getenv('KEYCLOAK_DEFAULT_PASSWORD')
-
-    print(TWILIO_ACCOUNT_SID)
-    print(TWILIO_AUTH_TOKEN)
-    print(TWILIO_PHONE_NUMBER)
+    app.register_blueprint(small_group_discussions_blueprint)
     
     db.init_app(app)
+
     keycloak_admin_wrapper.init(
         server_url=os.getenv('KEYCLOAK_ADMIN_SERVER_DEV'),
         username=os.getenv('KEYCLOAK_ADMIN_USERNAME'),
@@ -72,19 +62,13 @@ def create_app():
         port=os.getenv('REDIS_PORT'),
         decode_response=True
     )
-    # twilio_wrapper.init(
-    #     account_sid=os.getenv('TWILIO_ACCOUNT_SID'),
-    #     auth_token=os.getenv('TWILIO_AUTH_TOKEN'),
-    #     from_phone=os.getenv('TWILIO_PHONE_NUMBER')
-    # )
+   
     s3_wrapper.init(
         access_key=os.getenv('AWS_S3_ACCESS_KEY'),
         secret_key=os.getenv('AWS_S3_SECRET_KEY'),
         region='us-west-1',
         bucket_name=os.getenv('AWS_S3_BUCKET_NAME')
     )
-
-    
 
     with app.app_context():
         db.create_all()

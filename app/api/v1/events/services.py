@@ -51,6 +51,7 @@ class EventService:
             for event in events:
                 db.session.delete(event)
             db.session.commit()
+            
         except Exception:
             traceback.print_exc()
             db.session.rollback()
