@@ -43,6 +43,7 @@ def get_events():
             }), 200
         else:
             events = EventService.get_events()
+        # print(format_events_data(events))
         return jsonify({"data": format_events_data(events)}), 200
     except Exception:
         traceback.print_exc()

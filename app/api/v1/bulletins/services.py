@@ -23,23 +23,12 @@ class BulletinService:
     def search_bulletin(search_str):
         results = (
             db.session.query(Bulletin)
-            .options(
-                joinedload(Bulletin.news),
-                joinedload(Bulletin.hymns)
-            )
             .filter(
                 or_(
                     Bulletin.sermon_title.contains(search_str),
-                    Bulletin.sermon_subtitle.contains(search_str),
                     Bulletin.sermon_content.contains(search_str),
                     Bulletin.representative_prayer.contains(search_str),
-                    Bulletin.community_news.contains(search_str),
                     Bulletin.message.contains(search_str),
-                    Bulletin.post_message_hymn.contains(search_str),
-                    Bulletin.blessing.contains(search_str),
-                    News.title.contains(search_str),
-                    News.description.contains(search_str),
-                    Hymn.title.contains(search_str)
                 )
             )
             .all()

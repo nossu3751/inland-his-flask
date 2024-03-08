@@ -21,7 +21,7 @@ class EventService:
     @staticmethod
     def search_event(search_str):
         results = db.session.query(Event).filter(
-            Event.title.contains(search_str),
+            Event.title.contains(search_str)
         ).order_by(Event.start.asc()).all()
         print(results)
         return results
