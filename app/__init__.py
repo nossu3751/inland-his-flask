@@ -12,6 +12,7 @@ from app.api.v1.events.views import events_blueprint
 from app.api.v1.polls.views import polls_blueprint
 from app.api.v1.bible_challenge.views import bible_challenges_blueprint
 from app.api.v1.small_group_discussions.views import small_group_discussions_blueprint
+from app.api.v1.app_patches.views import app_patch_blueprint
 from dotenv import load_dotenv
 
 flask_env = os.getenv("INLAND_HIS_ENV")
@@ -46,6 +47,7 @@ def create_app():
     app.register_blueprint(polls_blueprint)
     app.register_blueprint(bible_challenges_blueprint)
     app.register_blueprint(small_group_discussions_blueprint)
+    app.register_blueprint(app_patch_blueprint)
     
     db.init_app(app)
 
