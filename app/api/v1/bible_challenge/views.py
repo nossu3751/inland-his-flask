@@ -18,7 +18,16 @@ def get_bible_challenges():
 @bible_challenges_blueprint.route('/<date>', methods=['GET'])
 def get_bible_verses_by_challenge_date(date):
     try:
-        bible_verses, book, chapter = BibleChallengeService.get_bible_verses_by_challenge_date(date)
+        verse_start = request.args.get("verseStart")
+        verse_end = request.args.get("verseEnd")
+        if verse_start != None:
+            verse_start = int(verse_start)
+        if verse_end != None:
+            verse_end = int(verse_end)
+        if verse_start == None or verse_end == None:
+            bible_verses, book, chapter = BibleChallengeService.get_bible_verses_by_challenge_date(date)
+        else:
+            bible_verses, book, chapter = BibleChallengeService.get_bible_verses_by_challenge_date(date, verse_start, verse_end)
         if bible_verses:
             return jsonify({
                 "verses":format_bible_verses(bible_verses),

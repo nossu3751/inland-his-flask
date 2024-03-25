@@ -21,7 +21,7 @@ class BibleChallengeService:
         return db.session.execute(stmt).scalars()
    
     @staticmethod
-    def get_bible_verses_by_challenge_date(date):
+    def get_bible_verses_by_challenge_date(date, verse_start=None, verse_end=None):
         stmt = select(BibleChallenge).where(BibleChallenge.date == date)
         result = db.session.execute(stmt).scalar_one_or_none()
         print("date", date, "result", result)
@@ -34,6 +34,8 @@ class BibleChallengeService:
                 )
             ).order_by(Bible.verse)
             verses = db.session.execute(verses_stmt).scalars().all()
+            if verse_start != None and verse_end != None:
+                verses = [verse for verse in verses if verse_start <= verse.verse and verse.verse <= verse_end]
             # print(verses)
             return verses, result.book, result.chapter
         else:
