@@ -1,0 +1,1 @@
+class NewComerNotAddedException(Exception): pass

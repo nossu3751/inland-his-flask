@@ -13,6 +13,7 @@ from app.api.v1.polls.views import polls_blueprint
 from app.api.v1.bible_challenge.views import bible_challenges_blueprint
 from app.api.v1.small_group_discussions.views import small_group_discussions_blueprint
 from app.api.v1.app_patches.views import app_patch_blueprint
+from app.api.v1.new_comer.views import new_comers_blueprint
 from dotenv import load_dotenv
 
 flask_env = os.getenv("INLAND_HIS_ENV")
@@ -48,17 +49,18 @@ def create_app():
     app.register_blueprint(bible_challenges_blueprint)
     app.register_blueprint(small_group_discussions_blueprint)
     app.register_blueprint(app_patch_blueprint)
+    app.register_blueprint(new_comers_blueprint)
     
     db.init_app(app)
 
-    keycloak_admin_wrapper.init(
-        server_url=os.getenv('KEYCLOAK_ADMIN_SERVER_DEV'),
-        username=os.getenv('KEYCLOAK_ADMIN_USERNAME'),
-        password=os.getenv('KEYCLOAK_ADMIN_PASSWORD'),
-        realm_name=os.getenv('KEYCLOAK_ADMIN_REALM'),
-        client_id=os.getenv('KEYCLOAK_ADMIN_CLIENT'),
-        user_password=os.getenv('KEYCLOAK_DEFAULT_PASSWORD')
-    )
+    # keycloak_admin_wrapper.init(
+    #     server_url=os.getenv('KEYCLOAK_ADMIN_SERVER_DEV'),
+    #     username=os.getenv('KEYCLOAK_ADMIN_USERNAME'),
+    #     password=os.getenv('KEYCLOAK_ADMIN_PASSWORD'),
+    #     realm_name=os.getenv('KEYCLOAK_ADMIN_REALM'),
+    #     client_id=os.getenv('KEYCLOAK_ADMIN_CLIENT'),
+    #     user_password=os.getenv('KEYCLOAK_DEFAULT_PASSWORD')
+    # )
     redis_wrapper.init(
         host=os.getenv('REDIS_HOST'),
         port=os.getenv('REDIS_PORT'),
